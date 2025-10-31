@@ -1,0 +1,80 @@
+
+You are an expert in Flutter, Dart, Get, Freezed, Flutter Hooks, and Supabase.
+
+Key Principles
+- Write concise, technical Dart code with accurate examples.
+- Use functional and declarative programming patterns where appropriate.
+- Prefer composition over inheritance.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported widget, subwidgets, helpers, static content, types.
+
+Dart/Flutter
+- Use const constructors for immutable widgets.
+- Leverage Freezed for immutable state classes and unions.
+- Use arrow syntax for simple functions and methods.
+- Prefer expression bodies for one-line getters and setters.
+- Use trailing commas for better formatting and diffs.
+- 使用app_component.dart下的showToast来显示提示信息;
+Error Handling and Validation
+- Implement error handling in views using SelectableText.rich instead of SnackBars.
+- Display errors in SelectableText.rich with red color for visibility.
+- Handle empty states within the displaying screen.
+- Use AsyncValue for proper error handling and loading states.
+网络请求相关规则
+-final response = await HttpUtil().post(Api.exchangeApplication,data: data);
+if(response.isSuccess){
+}
+else{
+showToast('${response.message}');
+}
+Loading.dismiss()，所有请求都是在我的控制器以这种方式请求，请求之前先定义好response数据类，当请求成功后都是使用数据类的frojson来把后端数据存入数据类;
+
+回复规则
+- 始终都是使用中文回复
+
+Getx 插件相关规则
+- 我每次叫你生成xxx文件，比如stock_detail，就是先生成一个stock_detail文件夹以及在stock_detail文件夹下生成stock_detail和stock_detail_ctrl的dart文件，类名就是像StockDetail和StockDetailCtrl，并且在f_uitl中创建路由名称和Getpage并使用基本的getx模板
+- 基本的getx模板就是页面文件使用getbuild和init来注册，scaffold-safeareas-center-column，并帮我写好一个组件方法，逻辑文件就是要有基本的init和onclose方法
+- 在每次生成的页面文件中在类的下一行实例化PublicWidget pW = PublicWidget(),所有可以公共化的widget方法抽离到这个PublicWidget()类里，并在页面中使用
+Performance Optimization
+- Use const widgets where possible to optimize rebuilds.
+- Implement list view optimizations (e.g., ListView.builder).
+- Use AssetImage for static images and cached_network_image for remote images.
+- Implement proper error handling for Supabase operations, including network errors.
+
+Key Conventions
+1. 
+2. Optimize for Flutter performance metrics (first meaningful paint, time to interactive).
+3. Prefer stateless widgets
+
+UI and Styling
+- Use Flutter's built-in widgets and create custom widgets.
+- Implement responsive design using LayoutBuilder or MediaQuery.
+- Use themes for consistent styling across the app.
+- Use Theme.of(context).textTheme.titleLarge instead of headline6, and headlineSmall instead of headline5 etc.
+
+Model and Database Conventions
+- Include createdAt, updatedAt, and isDeleted fields in database tables.
+- Use @JsonSerializable(fieldRename: FieldRename.snake) for models.
+- Implement @JsonKey(includeFromJson: true, includeToJson: false) for read-only fields.
+
+Widgets and UI Components
+- Create small, private widget classes instead of methods like Widget _build....
+- Implement RefreshIndicator for pull-to-refresh functionality.
+- In TextFields, set appropriate textCapitalization, keyboardType, and textInputAction.
+- Always include an errorBuilder when using Image.network.
+
+Miscellaneous
+- Use log instead of print for debugging.
+- Keep lines no longer than 80 characters, adding commas before closing brackets for multi-parameter functions.
+- Use @JsonValue(int) for enums that go to the database.
+
+Code Generation
+- Utilize build_runner for generating code from annotations (Freezed, JSON serialization).
+- Run 'flutter pub run build_runner build --delete-conflicting-outputs' after modifying annotated classes.
+
+Documentation
+- Document complex logic and non-obvious code decisions.
+- Follow official Flutter, Getx, and Supabase documentation for best practices.
+
+Refer to Flutter, Getx, and Supabase documentation for Widgets, State Management, and Backend Integration best practices.
