@@ -1,12 +1,15 @@
 import 'package:get/get.dart';
-import '../page/main_page/main_page.dart';
-import '../page/main_page/main_page_ctrl.dart';
-import '../page/game/game.dart';
-import '../page/game/game_ctrl.dart';
+import '../page/main_page.dart';
+import '../page/main_page_ctrl.dart';
+import '../page/game/my_game/game.dart';
+import '../page/game/my_game/game_ctrl.dart';
+import '../page/game/start_game.dart';
+import '../page/game/start_game_ctrl.dart';
 
 class FRoute {
   static const String mainPage = '/main_page';
   static const String game = '/game';
+  static const String startGame = '/start_game';
 
   static push(String name,
       {arguments, Function(dynamic)? result, bool? preventDuplicates}) {
@@ -46,6 +49,13 @@ class AppPages {
       page: () => Game(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => GameCtrl());
+      }),
+    ),
+    GetPage(
+      name: FRoute.startGame,
+      page: () => StartGame(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => StartGameCtrl());
       }),
     ),
   ];

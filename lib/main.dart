@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:untitled1/page/main_page/main_page.dart';
+import 'package:untitled1/page/main_page.dart';
 import 'package:untitled1/util/f_util.dart';
 
 void main() {

@@ -5,7 +5,7 @@ import 'package:untitled1/static/default.dart';
 import 'package:untitled1/static/font_style.dart';
 import 'package:untitled1/util/app_component.dart';
 
-import '../../util/f_util.dart';
+import '../util/f_util.dart';
 import 'main_page_ctrl.dart';
 import 'package:untitled1/gen/assets.gen.dart';
 
@@ -74,7 +74,7 @@ class MainPage extends GetView<MainPageCtrl> {
   Widget buildSampleWidget() {
     return ElevatedButton(
         onPressed: (){
-          FRoute.push(FRoute.game);
+          FRoute.push(FRoute.startGame);
         },
         style: ButtonStyle(
           padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 65.w,vertical: 30.h))

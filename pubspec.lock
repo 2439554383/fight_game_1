@@ -457,6 +457,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.0"
+  flame:
+    dependency: "direct main"
+    description:
+      name: flame
+      sha256: "3725f1ab4ca07f77955c2b1c21d02906646ec0be95f7bc141854a529704fda9d"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.33.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1069,6 +1077,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.0.3"
+  ordered_set:
+    dependency: transitive
+    description:
+      name: ordered_set
+      sha256: d6c1d053a533e84931a388cbf03f1ad21a0543bf06c7a281859d3ffacd8e15f2
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "8.0.0"
   package_config:
     dependency: transitive
     description:
