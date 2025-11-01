@@ -112,6 +112,7 @@ dependencies:
   change_app_package_name: ^1.5.0
   json_annotation: ^4.9.0
   flame: ^1.33.0
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -141,6 +142,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/images/scenery/
+    - assets/object/
+    - assets/audio/
 
 # flutter_gen 配置
 flutter_gen:
