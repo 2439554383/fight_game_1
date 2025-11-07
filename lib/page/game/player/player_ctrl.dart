@@ -17,8 +17,10 @@ import '../enemy/enemy_ctrl.dart';
 /// 负责处理角色的移动、攻击、防御、跳跃等所有行为
 class Player extends SpriteAnimationComponent
     with KeyboardHandler, HasGameRef, CollisionCallbacks {
+  static const double characterScale = 1.35;
+
   Player({super.position})
-    : super(size: Vector2(128, 128), anchor: Anchor.center);
+    : super(size: Vector2.all(128 * characterScale), anchor: Anchor.center);
 
   // ============ 常量定义 ============
 
@@ -100,6 +102,9 @@ class Player extends SpriteAnimationComponent
   /// 当前移动方向向量（归一化）
   Vector2 currentMoveDirection = Vector2.zero();
 
+  /// 是否处于摇杆输入模式
+  bool _isAnalogInputActive = false;
+
   /// 攻击连击计数（1-3）
   int attackCount = 0;
 
@@ -160,11 +165,13 @@ class Player extends SpriteAnimationComponent
 
   /// 处理按键按下事件
   void handleKeyDown(KeyDownEvent event) {
+    _isAnalogInputActive = false;
     handleVirtualKeyDown(event.logicalKey);
   }
 
   /// 处理按键松开事件
   void handleKeyUp(KeyUpEvent event) {
+    _isAnalogInputActive = false;
     handleVirtualKeyUp(event.logicalKey);
   }
 
@@ -198,6 +205,22 @@ class Player extends SpriteAnimationComponent
     }
   }
 
+  /// 摇杆更新移动方向（用于移动端）
+  void handleAnalogDirection(Vector2 direction) {
+    _isAnalogInputActive = direction.length2 > 0.0001;
+    if (_isAnalogInputActive) {
+      currentMoveDirection = direction.clone();
+      if (currentMoveDirection.length > 1) {
+        currentMoveDirection.normalize();
+      }
+    } else {
+      currentMoveDirection = Vector2.zero();
+    }
+
+    updateFacingDirection();
+    updateMovementAnimation();
+  }
+
   // ============ 移动相关方法 ============
 
   /// 更新移动方向：根据当前按下的按键计算移动向量和朝向
@@ -224,27 +247,15 @@ class Player extends SpriteAnimationComponent
       currentMoveDirection.normalize();
     }
 
-    // 更新角色朝向和动画
     updateFacingDirection();
     updateMovementAnimation();
   }
 
   /// 更新角色朝向：根据水平移动方向翻转角色
   void updateFacingDirection() {
-    final hasA = pressedMovementKeys.contains(LogicalKeyboardKey.keyA);
-    final hasD = pressedMovementKeys.contains(LogicalKeyboardKey.keyD);
-
-    // 如果同时按了A和D，或者都没按，保持当前朝向
-    if ((hasA && hasD) || (!hasA && !hasD)) {
-      return;
-    }
-
-    // 按A键：面向左（向后），使用 scale.x = -1 进行水平翻转
-    if (hasA) {
+    if (currentMoveDirection.x < -0.05) {
       scale.x = -1;
-    }
-    // 按D键：面向右（向前），恢复正常方向
-    else if (hasD) {
+    } else if (currentMoveDirection.x > 0.05) {
       scale.x = 1;
     }
   }

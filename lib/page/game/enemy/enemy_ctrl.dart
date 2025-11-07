@@ -8,15 +8,10 @@ import 'enemy_type.dart';
 
 /// 敌人角色组件
 /// 负责处理敌人的移动、攻击等AI行为
-class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks {
-  Enemy({
-    required this.enemyType,
-    required this.playerRef,
-    super.position,
-  }) : super(
-          size: Vector2(128,128),
-          anchor: Anchor.center,
-        );
+class Enemy extends SpriteAnimationComponent
+    with HasGameRef, CollisionCallbacks {
+  Enemy({required this.enemyType, required this.playerRef, super.position})
+    : super(size: Vector2(128, 128), anchor: Anchor.center);
 
   /// 敌人类型
   final EnemyType enemyType;
@@ -50,21 +45,19 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
 
   /// 动画索引（动态获取，因为不同敌人类型的动画顺序可能不同）
   int get animationIndexIdle => 0;
-  int get animationIndexWalk => 
-      config.actionNames.contains('Walk') 
-          ? config.actionNames.indexOf('Walk')
-          : config.actionNames.contains('Flight')
-              ? config.actionNames.indexOf('Flight')
-              : 1;
-  int get animationIndexAttack => 
-      config.actionNames.indexOf('Attack');
-  int get animationIndexHurt => 
-      config.actionNames.indexOf('Hurt');
-  int get animationIndexDeath => 
-      config.actionNames.indexOf('Death');
+  int get animationIndexWalk => config.actionNames.contains('Walk')
+      ? config.actionNames.indexOf('Walk')
+      : config.actionNames.contains('Flight')
+      ? config.actionNames.indexOf('Flight')
+      : 1;
+  int get animationIndexAttack => config.actionNames.indexOf('Attack');
+  int get animationIndexHurt => config.actionNames.indexOf('Hurt');
+  int get animationIndexDeath => config.actionNames.indexOf('Death');
 
   /// 动画每帧的播放时间（秒）
   static const double animationStepTime = 0.1;
+
+  static const double characterScale = Player.characterScale;
 
   /// 精灵图帧大小（根据敌人类型动态调整）
   Vector2 get frameSize {
@@ -72,9 +65,9 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
     switch (enemyType) {
       case EnemyType.demon:
       case EnemyType.lizard:
-        return Vector2(64,64); // 较小的敌人使用64x64
+        return Vector2(64, 64); // 较小的敌人使用64x64
       default:
-        return Vector2(128,128); // 其他敌人使用128x128
+        return Vector2(128, 128); // 其他敌人使用128x128
     }
   }
 
@@ -86,11 +79,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
     currentHealth = config.health;
     await loadAnimations();
     initializeEnemy();
-    add(
-        RectangleHitbox(
-            collisionType: CollisionType.passive
-        )
-    );
+    add(RectangleHitbox(collisionType: CollisionType.passive));
   }
 
   @override
@@ -99,8 +88,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
     if (other is ScreenHitbox) {
       print("检测到屏幕边缘碰撞");
       //...
-    }
-    else if (other is Player) {
+    } else if (other is Player) {
       print("检测到被人物碰撞");
     }
   }
@@ -210,8 +198,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
     // 检查攻击冷却
     final now = DateTime.now();
     if (lastAttackTime != null) {
-      final cooldownElapsed =
-          now.difference(lastAttackTime!).inMilliseconds;
+      final cooldownElapsed = now.difference(lastAttackTime!).inMilliseconds;
       if (cooldownElapsed < config.attackCooldownMs) {
         return;
       }
@@ -255,8 +242,9 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
         : 0.5; // 默认0.5秒
 
     // 检查攻击动画是否已经完成
-    final timeSinceAttackStart =
-        DateTime.now().difference(attackStartTime!).inMilliseconds;
+    final timeSinceAttackStart = DateTime.now()
+        .difference(attackStartTime!)
+        .inMilliseconds;
     final attackDurationMs = (attackDuration * 1000).round();
 
     if (timeSinceAttackStart >= attackDurationMs) {
@@ -331,7 +319,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
       Duration(
         milliseconds: animationIndexDeath < frameList.length
             ? (frameList[animationIndexDeath] * animationStepTime * 1000)
-                .round()
+                  .round()
             : 1000,
       ),
       () {
@@ -380,7 +368,7 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
           hasFrame = false;
         }
       }
-      
+
       // 如果找到了至少一帧，就使用这些帧创建动画
       if (frames.isNotEmpty) {
         final animation = SpriteAnimation.spriteList(
@@ -409,11 +397,13 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
               ),
               srcPosition: Vector2.zero(),
             );
-            animationList.add(SpriteAnimation.spriteList(
-              [placeholderSprite],
-              stepTime: animationStepTime,
-              loop: config.animationLoops[i],
-            ));
+            animationList.add(
+              SpriteAnimation.spriteList(
+                [placeholderSprite],
+                stepTime: animationStepTime,
+                loop: config.animationLoops[i],
+              ),
+            );
             frameList.add(1);
           } catch (e) {
             // 如果连占位符都加载不了，跳过这个动画
@@ -434,14 +424,15 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
     }
 
     // 根据第一帧的实际尺寸调整敌人的显示尺寸
-    if (animationList.isNotEmpty && animationList[animationIndexIdle].frames.isNotEmpty) {
+    if (animationList.isNotEmpty &&
+        animationList[animationIndexIdle].frames.isNotEmpty) {
       final firstFrame = animationList[animationIndexIdle].frames[0];
       final sprite = firstFrame.sprite;
-      
+
       // 根据实际图片尺寸调整敌人组件的显示尺寸
       final imageWidth = sprite.image.width.toDouble();
       final imageHeight = sprite.image.height.toDouble();
-      
+
       // 对于demon和lizard，使用实际尺寸
       // 对于其他敌人，如果图片较大则适当缩小
       if (enemyType == EnemyType.demon || enemyType == EnemyType.lizard) {
@@ -450,11 +441,9 @@ class Enemy extends SpriteAnimationComponent with HasGameRef,CollisionCallbacks 
         // 限制最大尺寸为200，保持宽高比
         final maxWidth = imageWidth.clamp(0, 200);
         final scaleFactor = maxWidth / imageWidth;
-        size = Vector2(
-          imageWidth * scaleFactor,
-          imageHeight * scaleFactor,
-        );
+        size = Vector2(imageWidth * scaleFactor, imageHeight * scaleFactor);
       }
+      size = size * characterScale;
     }
   }
 

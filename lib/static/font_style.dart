@@ -40,6 +40,11 @@ class MyFont {
     fontSize: 18.sp,
     fontWeight: FontWeight.w400,
   );
+  TextStyle white_4_25 = TextStyle(
+    color: Colors.white,
+    fontSize: 25.sp,
+    fontWeight: FontWeight.w800,
+  );
   TextStyle black_4_18 = TextStyle(
     color: Colors.black,
     fontSize: 35.sp,

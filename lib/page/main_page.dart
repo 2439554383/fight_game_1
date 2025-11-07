@@ -34,7 +34,7 @@ class MainPage extends GetView<MainPageCtrl> {
                     topButton(),
                     Spacer(),
                     buildSampleWidget(),
-                    SizedBox(height: 150.h),
+                    SizedBox(height: 70.h),
                   ],
                 ),
               ),

@@ -1,6 +1,6 @@
 import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
+import 'package:flame/events.dart' hide PointerMoveEvent;
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,7 +37,7 @@ class MyGame extends FlameGame
     try {
       return currentWorld.player;
     } on Exception catch (e) {
-        return null;
+      return null;
     }
 
     // on LateInitializationError {
@@ -110,6 +110,23 @@ class MyGame extends FlameGame
       currentPlayer.handleVirtualKeyUp(key);
     }
   }
+
+  void handleAnalogDirection(Vector2 direction) {
+    final currentPlayer = player;
+    if (currentPlayer == null || !currentPlayer.isMounted) {
+      return;
+    }
+    currentPlayer.handleAnalogDirection(direction);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    if (size.x <= 0 || size.y <= 0) {
+      return;
+    }
+    camera.viewport = FixedResolutionViewport(resolution: size);
+  }
 }
 
 class StartGame extends GetView<StartGameCtrl> {
@@ -126,17 +143,17 @@ class StartGame extends GetView<StartGameCtrl> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          GameWidget(game: _game),
+          Positioned.fill(child: GameWidget(game: _game)),
           Positioned(
             left: 50.w,
             top: 50.h,
             child: GetBuilder<StartGameCtrl>(
               builder: (ctrl) => Row(
                 children: [
-                  Text("武士长官", style: myFont.white_4_18),
+                  Text("武士长官", style: myFont.white_4_25),
                   SizedBox(width: 10.w),
                   Container(
-                    width: 200.w,
+                    width: 300.w,
                     height: 45.h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.r),
@@ -156,7 +173,7 @@ class StartGame extends GetView<StartGameCtrl> {
           Positioned(
             left: 48.w,
             bottom: 72.h,
-            child: _DirectionalPad(onKeyChange: _onVirtualKeyChange),
+            child: _VirtualJoystick(onChanged: _onAnalogDirectionChanged),
           ),
           Positioned(
             right: 48.w,
@@ -178,6 +195,10 @@ class StartGame extends GetView<StartGameCtrl> {
     );
   }
 
+  void _onAnalogDirectionChanged(Vector2 direction) {
+    _game.handleAnalogDirection(direction);
+  }
+
   void _onVirtualKeyChange(LogicalKeyboardKey key, bool isPressed) {
     _game.handleVirtualKey(key, isPressed);
   }
@@ -188,62 +209,6 @@ class StartGame extends GetView<StartGameCtrl> {
 
   void _onVirtualButtonReleased(LogicalKeyboardKey key) {
     _onVirtualKeyChange(key, false);
-  }
-}
-
-class _DirectionalPad extends StatelessWidget {
-  const _DirectionalPad({required this.onKeyChange});
-
-  final void Function(LogicalKeyboardKey key, bool isPressed) onKeyChange;
-
-  @override
-  Widget build(BuildContext context) {
-    final double buttonSize = 82.w;
-    final double spacing = 16.w;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(width: buttonSize + spacing),
-            _VirtualControlButton(
-              label: '上',
-              size: buttonSize,
-              onPressed: () => onKeyChange(LogicalKeyboardKey.keyW, true),
-              onReleased: () => onKeyChange(LogicalKeyboardKey.keyW, false),
-            ),
-          ],
-        ),
-        SizedBox(height: spacing),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _VirtualControlButton(
-              label: '左',
-              size: buttonSize,
-              onPressed: () => onKeyChange(LogicalKeyboardKey.keyA, true),
-              onReleased: () => onKeyChange(LogicalKeyboardKey.keyA, false),
-            ),
-            SizedBox(width: spacing),
-            _VirtualControlButton(
-              label: '下',
-              size: buttonSize,
-              onPressed: () => onKeyChange(LogicalKeyboardKey.keyS, true),
-              onReleased: () => onKeyChange(LogicalKeyboardKey.keyS, false),
-            ),
-            SizedBox(width: spacing),
-            _VirtualControlButton(
-              label: '右',
-              size: buttonSize,
-              onPressed: () => onKeyChange(LogicalKeyboardKey.keyD, true),
-              onReleased: () => onKeyChange(LogicalKeyboardKey.keyD, false),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }
 
@@ -266,40 +231,39 @@ class _ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double buttonSize = 86.w;
-    final double spacing = 18.h;
+    final double buttonSize = 129.w;
+    final double spacing = 27.w;
 
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _VirtualControlButton(
-          label: '跳',
-          size: buttonSize,
-          onPressed: onJump,
-          onReleased: onJumpRelease,
-        ),
-        SizedBox(height: spacing),
-        _VirtualControlButton(
+        _VirtualActionButton(
           label: '攻',
           size: buttonSize,
           onPressed: onAttack,
           onReleased: onAttackRelease,
         ),
-        SizedBox(height: spacing),
-        _VirtualControlButton(
+        SizedBox(width: spacing),
+        _VirtualActionButton(
           label: '防',
           size: buttonSize,
           onPressed: onGuard,
           onReleased: onGuardRelease,
+        ),
+        SizedBox(width: spacing),
+        _VirtualActionButton(
+          label: '跳',
+          size: buttonSize,
+          onPressed: onJump,
+          onReleased: onJumpRelease,
         ),
       ],
     );
   }
 }
 
-class _VirtualControlButton extends StatelessWidget {
-  const _VirtualControlButton({
+class _VirtualActionButton extends StatefulWidget {
+  const _VirtualActionButton({
     required this.label,
     required this.onPressed,
     required this.onReleased,
@@ -312,26 +276,194 @@ class _VirtualControlButton extends StatelessWidget {
   final double size;
 
   @override
+  State<_VirtualActionButton> createState() => _VirtualActionButtonState();
+}
+
+class _VirtualActionButtonState extends State<_VirtualActionButton> {
+  bool _isPressed = false;
+
+  void _handleDown(PointerDownEvent event) {
+    if (_isPressed) {
+      return;
+    }
+    setState(() => _isPressed = true);
+    widget.onPressed();
+  }
+
+  void _handleUp(PointerUpEvent event) {
+    if (!_isPressed) {
+      return;
+    }
+    setState(() => _isPressed = false);
+    widget.onReleased();
+  }
+
+  void _handleCancel(PointerCancelEvent event) {
+    if (!_isPressed) {
+      return;
+    }
+    setState(() => _isPressed = false);
+    widget.onReleased();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.titleMedium!
         .copyWith(color: Colors.white, fontWeight: FontWeight.w600);
 
     return Listener(
-      onPointerDown: (_) => onPressed(),
-      onPointerUp: (_) => onReleased(),
-      onPointerCancel: (_) => onReleased(),
+      onPointerDown: _handleDown,
+      onPointerUp: _handleUp,
+      onPointerCancel: _handleCancel,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: size,
-        height: size,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        width: widget.size,
+        height: widget.size,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.35),
+          color: _isPressed
+              ? Colors.white.withOpacity(0.35)
+              : Colors.black.withOpacity(0.35),
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: Colors.white.withOpacity(0.6), width: 2),
+          border: Border.all(color: Colors.white.withOpacity(0.7), width: 2),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: textStyle),
+        child: Transform.scale(
+          scale: _isPressed ? 0.92 : 1.0,
+          child: Text(widget.label, style: textStyle),
+        ),
       ),
     );
+  }
+}
+
+class _VirtualJoystick extends StatefulWidget {
+  const _VirtualJoystick({required this.onChanged});
+
+  final ValueChanged<Vector2> onChanged;
+
+  @override
+  State<_VirtualJoystick> createState() => _VirtualJoystickState();
+}
+
+class _VirtualJoystickState extends State<_VirtualJoystick> {
+  Offset _thumbOffset = Offset.zero;
+  bool _isActive = false;
+
+  void _onPointerDown(PointerDownEvent event) {
+    _updateThumbOffset(event.localPosition);
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    _updateThumbOffset(event.localPosition);
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    _resetJoystick();
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _resetJoystick();
+  }
+
+  void _resetJoystick() {
+    if (!_isActive && _thumbOffset == Offset.zero) {
+      return;
+    }
+    setState(() {
+      _thumbOffset = Offset.zero;
+      _isActive = false;
+    });
+    widget.onChanged(Vector2.zero());
+  }
+
+  void _updateThumbOffset(Offset position) {
+    final Size? boxSize = context.size;
+    if (boxSize == null) {
+      return;
+    }
+
+    final Offset center = Offset(boxSize.width / 2, boxSize.height / 2);
+    final Offset delta = position - center;
+    final double radius = boxSize.width / 2;
+    if (radius <= 0) {
+      return;
+    }
+
+    Offset clamped = delta;
+    if (delta.distance > radius) {
+      clamped = Offset.fromDirection(delta.direction, radius);
+    }
+
+    setState(() {
+      _thumbOffset = clamped;
+      _isActive = true;
+    });
+
+    final Vector2 direction = Vector2(clamped.dx / radius, clamped.dy / radius);
+    widget.onChanged(direction);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = 220.w;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        behavior: HitTestBehavior.opaque,
+        child: CustomPaint(
+          painter: _JoystickPainter(
+            thumbOffset: _thumbOffset,
+            isActive: _isActive,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JoystickPainter extends CustomPainter {
+  _JoystickPainter({required this.thumbOffset, required this.isActive});
+
+  final Offset thumbOffset;
+  final bool isActive;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    final double radius = size.width / 2;
+
+    final Paint basePaint = Paint()
+      ..color = Colors.black.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    final Paint borderPaint = Paint()
+      ..color = Colors.white.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+
+    final Paint thumbPaint = Paint()
+      ..color = isActive
+          ? Colors.white.withOpacity(0.45)
+          : Colors.white.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, radius, basePaint);
+    canvas.drawCircle(center, radius, borderPaint);
+
+    final Offset thumbCenter = center + thumbOffset;
+    canvas.drawCircle(thumbCenter, radius * 0.35, thumbPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _JoystickPainter oldDelegate) {
+    return oldDelegate.thumbOffset != thumbOffset ||
+        oldDelegate.isActive != isActive;
   }
 }

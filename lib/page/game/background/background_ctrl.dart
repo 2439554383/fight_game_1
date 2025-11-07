@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
+import 'package:flutter/widgets.dart';
 
 /// The [Background] is a component that is composed of multiple scrolling
 /// images which form a parallax, a way to simulate movement and depth in the
@@ -48,7 +49,11 @@ class Background extends ParallaxComponent {
       baseVelocity: baseVelocity,
       velocityMultiplierDelta: velocityMultiplierDelta,
       filterQuality: FilterQuality.none,
+      fill: LayerFill.height,
+      alignment: Alignment.center,
     );
+
+    size = game.size;
   }
 
   /// 更新背景滚动速度
